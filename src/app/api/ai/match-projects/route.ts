@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin';
+import { supabase } from '../../../../lib/supabase';
 import { buildProjectText, buildUserProfileText } from '../../../../lib/ai/embeddings';
 import { scoreProjectsWithGroq } from '../../../../lib/ai/groq';
 
@@ -27,9 +27,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    const supabaseAdmin = getSupabaseAdmin();
 
-    const { data: user, error: userError } = await supabaseAdmin
+
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, bio, degree, university, graduation_year')
       .eq('id', userId)
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { data: skillsData, error: skillsError } = await supabaseAdmin
+    const { data: skillsData, error: skillsError } = await supabase
       .from('user_skills')
       .select('skill_name')
       .eq('user_id', userId);
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ projects: [] });
     }
 
-    const { data: projectsData, error: projectsError } = await supabaseAdmin
+    const { data: projectsData, error: projectsError } = await supabase
       .from('projects')
       .select(
         `

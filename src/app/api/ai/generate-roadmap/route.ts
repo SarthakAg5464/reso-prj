@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin';
+import { supabase } from '../../../../lib/supabase';
 
 export const runtime = 'nodejs';
 
@@ -46,10 +46,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GROQ_API_KEY is not configured on the server.' }, { status: 500 });
     }
 
-    const supabaseAdmin = getSupabaseAdmin();
+
 
     // 1. Fetch project details (including founder_id)
-    const { data: project, error: projectError } = await supabaseAdmin
+    const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id, title, type, description, stage, founder_id')
       .eq('id', projectId)
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Fetch accepted team members from applications
-    const { data: apps } = await supabaseAdmin
+    const { data: apps } = await supabase
       .from('applications')
       .select('applicant_id')
       .eq('project_id', projectId)
@@ -74,12 +74,12 @@ export async function POST(request: Request) {
     }
 
     // 3. Fetch user profiles and skills for all team members
-    const { data: teamProfiles } = await supabaseAdmin
+    const { data: teamProfiles } = await supabase
       .from('users')
       .select('id, full_name')
       .in('id', teamUserIds);
 
-    const { data: teamSkills } = await supabaseAdmin
+    const { data: teamSkills } = await supabase
       .from('user_skills')
       .select('user_id, skill_name')
       .in('user_id', teamUserIds);
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     ).join('\n');
 
     // 4. Fetch project skills
-    const { data: skillsData, error: skillsError } = await supabaseAdmin
+    const { data: skillsData, error: skillsError } = await supabase
       .from('project_skills')
       .select('skill_name')
       .eq('project_id', projectId);
